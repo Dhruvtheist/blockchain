@@ -1,0 +1,155 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "C:\\Users\\dhruv\\.gemini\\antigravity\\scratch\\bluechain-registry\\contracts\\BlueCarbonRegistry.sol": {
+      "lastModificationDate": 1785844310920,
+      "contentHash": "0859f4f8bd7b20a4a3f71b25727537ba",
+      "sourceName": "contracts/BlueCarbonRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "BlueCarbonRegistry",
+        "IBlueCarbonToken"
+      ]
+    },
+    "C:\\Users\\dhruv\\.gemini\\antigravity\\scratch\\bluechain-registry\\contracts\\BlueCarbonToken.sol": {
+      "lastModificationDate": 1785844313455,
+      "contentHash": "758ed1bcfa27f913238ab1fab74096f1",
+      "sourceName": "contracts/BlueCarbonToken.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "BlueCarbonToken"
+      ]
+    },
+    "D:\\blockchain\\contracts\\BlueCarbonRegistry.sol": {
+      "lastModificationDate": 1785952227817,
+      "contentHash": "43e2e6667d9ec33a20f2da12f1550b40",
+      "sourceName": "contracts/BlueCarbonRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "BlueCarbonRegistry",
+        "IBlueCarbonToken"
+      ]
+    },
+    "D:\\blockchain\\contracts\\BlueCarbonToken.sol": {
+      "lastModificationDate": 1785844313455,
+      "contentHash": "758ed1bcfa27f913238ab1fab74096f1",
+      "sourceName": "contracts/BlueCarbonToken.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "BlueCarbonToken"
+      ]
+    }
+  }
+}
