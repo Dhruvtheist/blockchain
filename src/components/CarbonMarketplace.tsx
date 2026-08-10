@@ -1,23 +1,35 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import type { Project, CarbonCertificate } from '../types';
-import { ShoppingBag, Award, Wallet } from 'lucide-react';
+import { 
+  ShoppingBag, 
+  Search, 
+  FileText, 
+  MapPin, 
+  X
+} from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { CertificateModal } from './CertificateModal';
 
 export const CarbonMarketplace: React.FC = () => {
   const { projects, buyCredits, wallet, certificates } = useApp();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [purchaseAmount, setPurchaseAmount] = useState<number>(50);
+  const [inspectingProject, setInspectingProject] = useState<Project | null>(null);
+  const [purchaseAmount, setPurchaseAmount] = useState<number>(100);
   const [activeCert, setActiveCert] = useState<CarbonCertificate | null>(null);
   const [isBuying, setIsBuying] = useState(false);
   const [selectedEcosystem, setSelectedEcosystem] = useState<string>('ALL');
+  const [searchFilter, setSearchFilter] = useState<string>('');
 
   const verifiedProjects = projects.filter(p => p.status === 'Verified');
 
   const filteredProjects = verifiedProjects.filter(p => {
-    if (selectedEcosystem === 'ALL') return true;
-    return p.ecosystem === selectedEcosystem;
+    const matchesEco = selectedEcosystem === 'ALL' || p.ecosystem === selectedEcosystem;
+    const matchesSearch = searchFilter === '' || 
+      p.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+      p.id.toLowerCase().includes(searchFilter.toLowerCase()) ||
+      p.state.toLowerCase().includes(searchFilter.toLowerCase());
+    return matchesEco && matchesSearch;
   });
 
   const handlePurchase = async () => {
@@ -25,9 +37,10 @@ export const CarbonMarketplace: React.FC = () => {
     setIsBuying(true);
     try {
       const cert = await buyCredits(selectedProject.id, purchaseAmount);
-      confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+      confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
       setActiveCert(cert);
       setSelectedProject(null);
+      setInspectingProject(null);
     } catch (err) {
       console.error('Purchase failed', err);
     } finally {
@@ -36,194 +49,317 @@ export const CarbonMarketplace: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-12 animate-fadeIn pb-16">
       
-      {/* Header Banner */}
-      <div className="p-6 rounded-2xl glass-panel bg-slate-900/80 border border-sky-500/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30 text-xs font-semibold mb-2">
-            <ShoppingBag className="w-3.5 h-3.5 text-teal-400" />
-            <span>Verified Blue Carbon Credit Exchange</span>
+      {/* Editorial Header */}
+      <div className="border-b border-white/[0.08] pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2 text-[11px] font-mono text-[#8d998b]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#3fb978]" />
+            <span className="uppercase tracking-widest text-[#c2c9bf]">Verified Carbon Store</span>
+            <span className="text-white/20">/</span>
+            <span>Oxford Net-Zero Principles Aligned</span>
           </div>
-          <h2 className="text-xl font-extrabold text-white">Carbon Credit Marketplace</h2>
-          <p className="text-xs text-slate-300">Purchase verified ERC-20 BCT tokens directly from coastal restoration projects. 100% Traceable.</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-[#f5f6f2] tracking-tight font-display">
+            Institutional Blue Carbon Assets
+          </h1>
+          <p className="text-xs sm:text-sm text-[#8d998b] max-w-2xl leading-relaxed">
+            Acquire and retire verified blue carbon tokens (BCT). Every asset is backed by multi-spectral satellite observation, audited biomass models, and sub-meter GIS bounding boxes.
+          </p>
         </div>
 
-        {/* Ecosystem Filter */}
-        <div className="flex items-center space-x-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-xs">
-          {(['ALL', 'Mangrove', 'Seagrass', 'Salt Marsh'] as const).map(eco => (
+        {/* Quick Balance Readout */}
+        <div className="flex items-center space-x-4 border border-white/[0.1] bg-[#0c120e] p-4 text-xs font-mono">
+          <div>
+            <span className="text-[#8d998b] text-[10px] block uppercase">Wallet Balance</span>
+            <span className="text-[#3fb978] font-bold">{wallet.balanceBCT.toLocaleString()} BCT</span>
+          </div>
+          <div className="border-l border-white/[0.08] pl-4">
+            <span className="text-[#8d998b] text-[10px] block uppercase">Retirements</span>
+            <span className="text-[#f5f6f2] font-bold">{certificates.length} Certs</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter and Search Bar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        {/* Ecosystem Tabs */}
+        <div className="flex items-center space-x-1 border border-white/[0.08] bg-[#070a08] p-1 text-xs font-mono">
+          {['ALL', 'Mangrove', 'Seagrass', 'Salt Marsh'].map((eco) => (
             <button
               key={eco}
               onClick={() => setSelectedEcosystem(eco)}
-              className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all ${
-                selectedEcosystem === eco ? 'bg-teal-500 text-white shadow' : 'text-slate-400 hover:text-slate-200'
+              className={`px-3 py-1.5 transition-all cursor-pointer ${
+                selectedEcosystem === eco
+                  ? 'bg-[#18241c] text-[#3fb978] font-semibold'
+                  : 'text-[#8d998b] hover:text-white'
               }`}
             >
-              {eco}
+              {eco === 'ALL' ? 'All Habitats' : eco}
             </button>
           ))}
         </div>
-      </div>
 
-      {/* Wallet Balance Strip */}
-      <div className="p-4 rounded-xl glass-panel bg-slate-950/70 border border-slate-800 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400">
-            <Wallet className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="text-[10px] text-slate-400 uppercase font-semibold block">Connected Account Balance:</span>
-            <div className="flex items-center space-x-3 text-xs font-mono font-bold">
-              <span className="text-emerald-400">{wallet.balanceBCT.toLocaleString()} BCT</span>
-              <span className="text-slate-500">•</span>
-              <span className="text-sky-300">{wallet.balanceETH} ETH</span>
-            </div>
-          </div>
+        {/* Search Input */}
+        <div className="relative w-full sm:w-72">
+          <Search className="w-3.5 h-3.5 text-[#8d998b] absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Search by ID, name, or state..."
+            value={searchFilter}
+            onChange={(e) => setSearchFilter(e.target.value)}
+            className="editorial-input w-full pl-9 pr-3 py-1.5 text-xs font-mono"
+          />
         </div>
-
-        {certificates.length > 0 && (
-          <button
-            onClick={() => setActiveCert(certificates[0])}
-            className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 text-xs font-semibold"
-          >
-            <Award className="w-4 h-4" />
-            <span>View My Issued Certificates ({certificates.length})</span>
-          </button>
-        )}
       </div>
 
-      {/* Projects Marketplace Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProjects.map(project => (
-          <div 
-            key={project.id}
-            className="rounded-2xl glass-panel bg-slate-900/80 border border-sky-500/20 overflow-hidden glass-panel-hover flex flex-col justify-between"
-          >
-            <div>
-              {/* Project Image */}
-              <div className="relative h-44 w-full overflow-hidden">
-                <img 
-                  src={project.imageUrl} 
-                  alt={project.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
-                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-emerald-500/90 text-white font-bold text-[10px] backdrop-blur-md">
-                  Government Verified
-                </span>
-                <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-slate-950/80 text-sky-300 border border-sky-500/30 font-mono text-[10px] font-bold">
-                  ${project.pricePerCreditUSD} / ton
-                </span>
-              </div>
+      {/* Project Asset Dossier Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {filteredProjects.map((p) => {
+          const pricePerTon = p.pricePerCreditUSD || 24.5;
+          const availableBCT = p.creditsIssued > 0 ? p.creditsIssued : Math.floor(p.estimatedCarbonTons * 0.4);
 
-              {/* Card Body */}
-              <div className="p-5 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono text-sky-400 font-bold">{project.id}</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 font-semibold">
-                    {project.ecosystem}
-                  </span>
-                </div>
-
-                <h3 className="font-extrabold text-base text-white leading-snug">{project.name}</h3>
-                <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">{project.description}</p>
-
-                <div className="pt-2 border-t border-slate-800 text-xs space-y-1.5 font-mono">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Available Credits:</span>
-                    <span className="text-emerald-400 font-bold">{project.creditsAvailable.toLocaleString()} BCT</span>
+          return (
+            <div 
+              key={p.id}
+              className="editorial-card flex flex-col justify-between overflow-hidden group"
+            >
+              <div>
+                {/* Visual Image Header with Art-Directed Framing */}
+                <div className="relative aspect-[16/9] overflow-hidden border-b border-white/[0.08]">
+                  <img 
+                    src={p.imageUrl || '/images/sundarbans_mangrove_aerial.png'} 
+                    alt={`Coastal ${p.ecosystem} ecosystem project - ${p.name}`}
+                    loading="lazy"
+                    className="w-full h-full object-cover grayscale contrast-125 group-hover:scale-105 group-hover:grayscale-0 transition-all duration-700 opacity-85"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#070a08]/90 via-transparent to-transparent opacity-80" />
+                  
+                  <div className="absolute top-3 left-3 flex items-center space-x-1.5">
+                    <span className="px-2 py-0.5 bg-[#070a08]/90 border border-white/[0.1] text-[10px] font-mono text-[#3fb978]">
+                      Verified Tier-1
+                    </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Total Sequestered:</span>
-                    <span className="text-teal-300">{project.estimatedCarbonTons.toLocaleString()} tCO₂e</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Location:</span>
-                    <span className="text-slate-300 font-sans">{project.state}</span>
+
+                  <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-[#070a08]/90 border border-white/[0.1] text-xs font-mono font-bold text-[#f5f6f2]">
+                    ${pricePerTon} <span className="text-[10px] font-normal text-[#8d998b]">/ tCO₂e</span>
                   </div>
                 </div>
+
+                {/* Metadata & Title */}
+                <div className="p-6 space-y-4">
+                  <div className="flex items-center justify-between text-[11px] font-mono">
+                    <span className="text-[#3fb978]">{p.id}</span>
+                    <span className="text-[#8d998b]">{p.ecosystem} • VM0033</span>
+                  </div>
+
+                  <h3 className="text-base font-bold text-[#f5f6f2] font-display line-clamp-1">
+                    {p.name}
+                  </h3>
+
+                  <p className="text-xs text-[#8d998b] line-clamp-2 leading-relaxed">
+                    {p.description}
+                  </p>
+
+                  {/* Metrics Table */}
+                  <div className="grid grid-cols-3 gap-2 py-3 border-t border-b border-white/[0.06] text-xs font-mono">
+                    <div>
+                      <span className="text-[9px] text-[#8d998b] block uppercase">Available</span>
+                      <span className="text-[#3fb978] font-bold">{availableBCT.toLocaleString()}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] text-[#8d998b] block uppercase">Total Sink</span>
+                      <span className="text-[#f5f6f2] font-bold">{p.estimatedCarbonTons.toLocaleString()} t</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] text-[#8d998b] block uppercase">Area</span>
+                      <span className="text-[#f5f6f2] font-bold">{p.areaHectares} ha</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-1.5 text-xs text-[#8d998b]">
+                    <MapPin className="w-3.5 h-3.5 text-[#3fb978]" />
+                    <span>{p.state}, India</span>
+                  </div>
+                </div>
               </div>
+
+              {/* Action Buttons */}
+              <div className="p-6 pt-0 space-y-2">
+                <button
+                  onClick={() => setInspectingProject(p)}
+                  className="w-full py-2.5 bg-[#070a08] hover:bg-[#121a14] border border-white/[0.1] text-xs font-mono text-[#c2c9bf] transition flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <FileText className="w-3.5 h-3.5 text-[#3fb978]" />
+                  <span>Due Diligence Dossier</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setSelectedProject(p);
+                    setPurchaseAmount(100);
+                  }}
+                  className="w-full py-2.5 bg-[#f5f6f2] hover:bg-white text-[#070a08] text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                >
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                  <span>Procure & Settle Credits</span>
+                </button>
+              </div>
+
             </div>
+          );
+        })}
+      </div>
 
-            {/* Card Footer Button */}
-            <div className="p-5 pt-0">
-              <button
-                onClick={() => { setSelectedProject(project); setPurchaseAmount(100); }}
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-teal-500 text-white font-bold text-xs shadow-lg shadow-sky-500/25 hover:opacity-90 transition-all flex items-center justify-center space-x-1.5"
+      {/* DUE DILIGENCE DOSSIER MODAL WITH INTEGRATED REALISTIC HABITAT IMAGERY */}
+      {inspectingProject && (
+        <div className="fixed inset-0 z-50 bg-[#070a08]/85 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-[#0c120e] border border-white/15 max-w-3xl w-full p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div>
+                <span className="text-[10px] font-mono text-[#3fb978] uppercase">{inspectingProject.id}</span>
+                <h3 className="text-xl font-bold text-[#f5f6f2] font-display">{inspectingProject.name}</h3>
+              </div>
+              <button 
+                onClick={() => setInspectingProject(null)}
+                className="p-1 text-[#8d998b] hover:text-white cursor-pointer"
               >
-                <ShoppingBag className="w-3.5 h-3.5" />
-                <span>Buy Carbon Credits</span>
+                <X className="w-5 h-5" />
               </button>
             </div>
-          </div>
-        ))}
-      </div>
 
-      {/* Purchase Modal */}
-      {selectedProject && (
-        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="max-w-md w-full rounded-2xl glass-panel bg-slate-900 border border-sky-500/40 p-6 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center space-x-2 text-sky-400 font-bold text-base">
-                <ShoppingBag className="w-5 h-5" />
-                <span>Purchase Carbon Offsets</span>
-              </div>
-              <button onClick={() => setSelectedProject(null)} className="text-slate-400 hover:text-white">✕</button>
-            </div>
-
-            <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-xs space-y-1">
-              <div className="font-bold text-white">{selectedProject.name}</div>
-              <div className="text-slate-400">{selectedProject.ecosystem} • ${selectedProject.pricePerCreditUSD} per Metric Ton</div>
-              <div className="text-emerald-400 font-bold">Max Available: {selectedProject.creditsAvailable.toLocaleString()} BCT</div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Select Credit Quantity (Metric Tons CO₂e)</label>
-              <input
-                type="number"
-                min="1"
-                max={selectedProject.creditsAvailable}
-                value={purchaseAmount}
-                onChange={e => setPurchaseAmount(parseInt(e.target.value) || 1)}
-                className="w-full px-3 py-2 rounded-xl glass-input text-sm font-bold text-sky-400 font-mono"
+            {/* Visual Habitat Inspection Frame */}
+            <div className="relative aspect-[21/9] overflow-hidden border border-white/[0.1] bg-[#070a08]">
+              <img 
+                src={inspectingProject.imageUrl} 
+                alt={inspectingProject.name}
+                className="w-full h-full object-cover grayscale contrast-125 opacity-85"
               />
-            </div>
-
-            <div className="p-3 rounded-xl bg-sky-950/40 border border-sky-500/30 text-xs space-y-1 font-mono">
-              <div className="flex justify-between">
-                <span className="text-slate-400">Price Subtotal:</span>
-                <span className="text-white font-bold">${(purchaseAmount * selectedProject.pricePerCreditUSD).toLocaleString()} USD</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">ETH Equivalent:</span>
-                <span className="text-teal-300 font-bold">{(purchaseAmount * 0.008).toFixed(4)} ETH</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Minted Token:</span>
-                <span className="text-emerald-400 font-bold">{purchaseAmount} BCT ERC-20</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0c120e] via-transparent to-transparent opacity-80" />
+              <div className="absolute bottom-3 left-4 right-4 flex justify-between items-end text-xs font-mono">
+                <span className="text-[#f5f6f2] font-semibold">{inspectingProject.ecosystem} Habitat Telemetry</span>
+                <span className="text-[#3fb978]">{inspectingProject.lat.toFixed(4)}° N, {inspectingProject.lng.toFixed(4)}° E</span>
               </div>
             </div>
 
-            <div className="flex items-center justify-end space-x-3 pt-2">
+            <div className="space-y-4 text-xs text-[#8d998b] leading-relaxed">
+              <p>{inspectingProject.description}</p>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-[#070a08] border border-white/[0.08] font-mono">
+                <div>
+                  <span className="text-[9px] uppercase text-[#8d998b] block">Ecosystem</span>
+                  <span className="text-[#f5f6f2] font-bold">{inspectingProject.ecosystem}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] uppercase text-[#8d998b] block">Coordinates</span>
+                  <span className="text-[#3fb978]">{inspectingProject.lat.toFixed(3)}°, {inspectingProject.lng.toFixed(3)}°</span>
+                </div>
+                <div>
+                  <span className="text-[9px] uppercase text-[#8d998b] block">Area</span>
+                  <span className="text-[#f5f6f2]">{inspectingProject.areaHectares} Hectares</span>
+                </div>
+                <div>
+                  <span className="text-[9px] uppercase text-[#8d998b] block">Annual Capacity</span>
+                  <span className="text-[#3fb978]">{inspectingProject.estimatedCarbonTons.toLocaleString()} tCO₂e</span>
+                </div>
+              </div>
+
+              <div className="space-y-2 border-t border-white/[0.08] pt-4">
+                <span className="font-mono text-[11px] text-[#f5f6f2] uppercase">Scientific Telemetry Index</span>
+                <ul className="space-y-1 text-[#8d998b]">
+                  <li>• Sentinel-2 MSI Multi-Spectral Ingestion: <span className="text-[#3fb978] font-mono">B8/B4 Validated (10m Resolution)</span></li>
+                  <li>• Ground Truth Sensors: <span className="text-[#3fb978] font-mono">Water Salinity & Core Density Telemetry Connected</span></li>
+                  <li>• Smart Contract Hash: <span className="text-[#8d998b] font-mono">0x8A75c12...4b92</span></li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
               <button
-                onClick={() => setSelectedProject(null)}
-                className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold"
+                onClick={() => setInspectingProject(null)}
+                className="px-4 py-2 border border-white/15 text-xs text-[#8d998b] hover:text-white cursor-pointer"
               >
-                Cancel
+                Close Dossier
               </button>
               <button
-                onClick={handlePurchase}
-                disabled={isBuying}
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-teal-500 text-white font-bold text-xs shadow-lg shadow-sky-500/25"
+                onClick={() => {
+                  setSelectedProject(inspectingProject);
+                  setInspectingProject(null);
+                }}
+                className="px-5 py-2 bg-[#f5f6f2] hover:bg-white text-[#070a08] text-xs font-semibold cursor-pointer"
               >
-                {isBuying ? 'Executing Web3 Transfer...' : 'Confirm & Buy Credits'}
+                Proceed to Procurement
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Certificate Viewer Modal */}
+      {/* PROCUREMENT CHECKOUT MODAL */}
+      {selectedProject && (
+        <div className="fixed inset-0 z-50 bg-[#070a08]/85 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-[#0c120e] border border-white/15 max-w-md w-full p-6 space-y-6">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div>
+                <span className="text-[10px] font-mono text-[#3fb978]">Settlement Order</span>
+                <h3 className="text-lg font-bold text-[#f5f6f2] font-display">{selectedProject.name}</h3>
+              </div>
+              <button onClick={() => setSelectedProject(null)} className="cursor-pointer text-[#8d998b] hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-mono text-[#8d998b] block mb-1.5">Credit Quantity (tCO₂e / BCT)</label>
+                <input
+                  type="number"
+                  min="1"
+                  max={selectedProject.estimatedCarbonTons}
+                  value={purchaseAmount}
+                  onChange={(e) => setPurchaseAmount(Math.max(1, parseInt(e.target.value) || 0))}
+                  className="editorial-input w-full p-3 font-mono text-sm"
+                />
+              </div>
+
+              <div className="p-4 bg-[#070a08] border border-white/[0.08] space-y-2 font-mono text-xs">
+                <div className="flex justify-between text-[#8d998b]">
+                  <span>Price per tCO₂e:</span>
+                  <span className="text-[#f5f6f2]">${selectedProject.pricePerCreditUSD || 24.5} USD</span>
+                </div>
+                <div className="flex justify-between text-[#8d998b]">
+                  <span>Protocol Verification Fee:</span>
+                  <span className="text-[#f5f6f2]">$0.00 (Gasless)</span>
+                </div>
+                <div className="flex justify-between border-t border-white/[0.08] pt-2 text-sm font-bold text-[#f5f6f2]">
+                  <span>Total Settlement:</span>
+                  <span className="text-[#3fb978]">${(purchaseAmount * (selectedProject.pricePerCreditUSD || 24.5)).toLocaleString()} USD</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                onClick={() => setSelectedProject(null)}
+                className="px-4 py-2 border border-white/15 text-xs text-[#8d998b] hover:text-white cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handlePurchase}
+                disabled={isBuying}
+                className="px-5 py-2 bg-[#f5f6f2] hover:bg-white text-[#070a08] text-xs font-semibold transition cursor-pointer"
+              >
+                {isBuying ? 'Executing Transaction...' : 'Confirm & Retire'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CERTIFICATE MODAL */}
       {activeCert && (
         <CertificateModal certificate={activeCert} onClose={() => setActiveCert(null)} />
       )}

@@ -57,7 +57,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [projects, setProjects] = useState<Project[]>(() => {
     const saved = localStorage.getItem('bluechain_projects');
-    return saved ? JSON.parse(saved) : INITIAL_PROJECTS;
+    if (!saved) return INITIAL_PROJECTS;
+    try {
+      const parsed: Project[] = JSON.parse(saved);
+      return parsed.map(p => {
+        const init = INITIAL_PROJECTS.find(ip => ip.id === p.id);
+        return init ? { ...p, imageUrl: init.imageUrl } : p;
+      });
+    } catch {
+      return INITIAL_PROJECTS;
+    }
   });
 
   const [transactions, setTransactions] = useState<BlockchainTransaction[]>(() => {

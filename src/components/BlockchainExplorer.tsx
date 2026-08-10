@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Blocks, Copy, Check, Code, Cpu } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 
 export const BlockchainExplorer: React.FC = () => {
   const { transactions, contractAddress } = useApp();
@@ -14,6 +14,7 @@ pragma solidity ^0.8.20;
 /**
  * @title BlueCarbonRegistry
  * @dev Smart Contract for Decentralized Blue Carbon Project Lifecycle & Cryptographic Verification
+ * Compliant with Oxford Offsetting Principles & ICVCM Core Carbon Principles.
  */
 contract BlueCarbonRegistry {
     address public governmentAdmin;
@@ -33,7 +34,7 @@ contract BlueCarbonRegistry {
     event ProjectVerified(string indexed id, address indexed verifier, uint256 creditsMinted);
 
     function verifyAndIssueCredits(string memory _id, uint256 _creditsToMint) external {
-        require(msg.sender == governmentAdmin, "Only Gov Admin");
+        require(msg.sender == governmentAdmin, "Only Authorized Verifier");
         Project storage proj = projects[_id];
         proj.status = 1;
         proj.carbonCreditsIssued = _creditsToMint;
@@ -46,7 +47,7 @@ pragma solidity ^0.8.20;
 
 /**
  * @title BlueCarbonToken (BCT)
- * @dev ERC20 Token Standard for Verified Carbon Offsets (1 BCT = 1 Metric Ton CO2e)
+ * @dev ERC20 Token Standard for Verified Blue Carbon Removals (1 BCT = 1 Metric Ton CO2e)
  */
 contract BlueCarbonToken {
     string public name = "BlueChain Verified Carbon Offset";
@@ -57,13 +58,19 @@ contract BlueCarbonToken {
     mapping(address => uint256) public balanceOf;
 
     event TokensMinted(address indexed to, uint256 amount);
+    event TokensRetired(address indexed burner, uint256 amount, string reason);
 
-    function mint(address to, uint256 amount) external returns (bool) {
-        uint256 scaled = amount * (10 ** 18);
-        totalSupply += scaled;
-        balanceOf[to] += scaled;
-        emit TokensMinted(to, amount);
-        return true;
+    function mint(address _to, uint256 _amount) external {
+        balanceOf[_to] += _amount;
+        totalSupply += _amount;
+        emit TokensMinted(_to, _amount);
+    }
+
+    function retire(uint256 _amount, string memory _reason) external {
+        require(balanceOf[msg.sender] >= _amount, "Insufficient BCT Balance");
+        balanceOf[msg.sender] -= _amount;
+        totalSupply -= _amount;
+        emit TokensRetired(msg.sender, _amount, _reason);
     }
 }`;
 
@@ -74,154 +81,117 @@ contract BlueCarbonToken {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-12 animate-fadeIn pb-16">
       
-      {/* Contract Banner Header */}
-      <div className="p-6 rounded-2xl glass-panel bg-slate-900/80 border border-sky-500/20 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs font-semibold mb-2">
-            <Blocks className="w-3.5 h-3.5 text-sky-400" />
-            <span>Ethereum Testnet Verified Smart Contract</span>
+      {/* Header */}
+      <div className="border-b border-white/[0.08] pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2 text-[11px] font-mono text-[#8d998b]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#3fb978]" />
+            <span className="uppercase tracking-widest text-[#c2c9bf]">On-Chain Ledger</span>
+            <span className="text-white/20">/</span>
+            <span>Polygon EVM Smart Contracts</span>
           </div>
-          <h2 className="text-xl font-extrabold text-white">Blockchain Carbon Registry & Immutable Ledger</h2>
-          <p className="text-xs text-slate-400">Cryptographic audit log for all project registrations, government verifications, and credit transfers</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-[#f5f6f2] tracking-tight font-display">
+            Decentralized Explorer & Source Code
+          </h1>
+          <p className="text-xs sm:text-sm text-[#8d998b] max-w-2xl leading-relaxed">
+            Transparent transaction ledger, smart contract addresses, and immutable execution logs for all BlueChain registry operations.
+          </p>
         </div>
 
-        {/* Tab Selector */}
-        <div className="flex items-center space-x-2 bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-xs">
+        {/* Contract Address Pill */}
+        <div className="flex items-center space-x-3 border border-white/[0.1] bg-[#0c120e] p-3 text-xs font-mono">
+          <div>
+            <span className="text-[10px] text-[#8d998b] block uppercase">Registry Contract</span>
+            <span className="text-[#3fb978] font-bold">{contractAddress}</span>
+          </div>
           <button
-            onClick={() => setActiveTab('TX_LIST')}
-            className={`px-4 py-2 rounded-lg font-bold transition-all ${
-              activeTab === 'TX_LIST' ? 'bg-sky-500 text-white shadow' : 'text-slate-400 hover:text-slate-200'
-            }`}
+            onClick={() => copyToClipboard(contractAddress)}
+            className="p-1.5 text-[#8d998b] hover:text-white transition cursor-pointer"
           >
-            Transaction Feed
-          </button>
-          <button
-            onClick={() => setActiveTab('CONTRACT_CODE')}
-            className={`px-4 py-2 rounded-lg font-bold transition-all flex items-center space-x-1.5 ${
-              activeTab === 'CONTRACT_CODE' ? 'bg-sky-500 text-white shadow' : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Code className="w-3.5 h-3.5" />
-            <span>Solidity Smart Contracts</span>
+            {copiedHash === contractAddress ? <Check className="w-3.5 h-3.5 text-[#3fb978]" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
         </div>
       </div>
 
-      {/* Contract Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 rounded-xl glass-panel bg-slate-900/60 border border-slate-800 text-xs space-y-1">
-          <div className="text-slate-400">Registry Contract Address:</div>
-          <div className="font-mono text-sky-300 font-bold flex items-center justify-between">
-            <span>{contractAddress}</span>
-            <button onClick={() => copyToClipboard(contractAddress)}>
-              {copiedHash === contractAddress ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-400 hover:text-white" />}
-            </button>
-          </div>
-        </div>
-
-        <div className="p-4 rounded-xl glass-panel bg-slate-900/60 border border-slate-800 text-xs space-y-1">
-          <div className="text-slate-400">Total On-Chain Blocks:</div>
-          <div className="font-mono text-emerald-400 font-bold text-base">#19,485,240</div>
-        </div>
-
-        <div className="p-4 rounded-xl glass-panel bg-slate-900/60 border border-slate-800 text-xs space-y-1">
-          <div className="text-slate-400">Consensus Engine:</div>
-          <div className="font-semibold text-teal-300 flex items-center space-x-1">
-            <Cpu className="w-3.5 h-3.5 text-teal-400" />
-            <span>Proof of Stake (PoS) • Sepolia</span>
-          </div>
-        </div>
+      {/* Tabs */}
+      <div className="flex items-center space-x-2 border-b border-white/[0.08] pb-2 text-xs font-mono">
+        <button
+          onClick={() => setActiveTab('TX_LIST')}
+          className={`px-4 py-2 transition-all cursor-pointer ${
+            activeTab === 'TX_LIST' ? 'border-b-2 border-[#3fb978] text-[#f5f6f2] font-semibold' : 'text-[#8d998b] hover:text-white'
+          }`}
+        >
+          Transaction Ledger ({transactions.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('CONTRACT_CODE')}
+          className={`px-4 py-2 transition-all cursor-pointer ${
+            activeTab === 'CONTRACT_CODE' ? 'border-b-2 border-[#3fb978] text-[#f5f6f2] font-semibold' : 'text-[#8d998b] hover:text-white'
+          }`}
+        >
+          Smart Contract Source Code
+        </button>
       </div>
 
       {activeTab === 'TX_LIST' ? (
-        /* Transactions Ledger Table */
-        <div className="rounded-2xl glass-panel bg-slate-900/80 border border-sky-500/20 overflow-hidden">
-          <div className="p-4 border-b border-slate-800 flex items-center justify-between text-xs font-bold text-slate-200">
-            <span>All Immutable Blockchain Transactions ({transactions.length})</span>
-            <span className="text-slate-500 font-mono text-[10px]">Zero Tamper Risk</span>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-800 text-slate-400 font-semibold bg-slate-950/60">
-                  <th className="py-3.5 px-4">Tx Hash</th>
-                  <th className="py-3.5 px-4">Method / Action</th>
-                  <th className="py-3.5 px-4">Project</th>
-                  <th className="py-3.5 px-4">Sender (From)</th>
-                  <th className="py-3.5 px-4">Recipient (To)</th>
-                  <th className="py-3.5 px-4">Amount</th>
-                  <th className="py-3.5 px-4">Gas Used</th>
-                  <th className="py-3.5 px-4">Timestamp</th>
+        <div className="editorial-card overflow-hidden">
+          <table className="w-full text-left text-xs font-mono">
+            <thead>
+              <tr className="border-b border-white/[0.08] bg-[#070a08] text-[10px] uppercase text-[#8d998b]">
+                <th className="py-3 px-4">Transaction Hash</th>
+                <th className="py-3 px-4">Method Action</th>
+                <th className="py-3 px-4">Project</th>
+                <th className="py-3 px-4">From Address</th>
+                <th className="py-3 px-4">Amount</th>
+                <th className="py-3 px-4 text-right">Timestamp</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/[0.05]">
+              {transactions.map((tx, idx) => (
+                <tr key={tx.hash || idx} className="hover:bg-white/[0.02] transition-colors">
+                  <td className="py-3 px-4 text-[#3fb978] flex items-center space-x-1.5">
+                    <span>{tx.hash.substring(0, 16)}...</span>
+                    <button 
+                      onClick={() => copyToClipboard(tx.hash)}
+                      className="text-[#8d998b] hover:text-white cursor-pointer"
+                    >
+                      {copiedHash === tx.hash ? <Check className="w-3 h-3 text-[#3fb978]" /> : <Copy className="w-3 h-3" />}
+                    </button>
+                  </td>
+                  <td className="py-3 px-4 text-[#f5f6f2] font-sans font-medium">{tx.txType}</td>
+                  <td className="py-3 px-4 text-[#8d998b] font-sans">{tx.projectName || tx.projectId}</td>
+                  <td className="py-3 px-4 text-[#c2c9bf]">{tx.sender.substring(0, 10)}...</td>
+                  <td className="py-3 px-4 text-[#3fb978]">{tx.amount.toLocaleString()} BCT</td>
+                  <td className="py-3 px-4 text-right text-[#8d998b]">{tx.timestamp}</td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
-                {transactions.map(tx => (
-                  <tr key={tx.hash} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-3.5 px-4 font-bold text-sky-400 flex items-center space-x-1.5">
-                      <span>{tx.hash.substring(0, 12)}...{tx.hash.substring(tx.hash.length - 4)}</span>
-                      <button onClick={() => copyToClipboard(tx.hash)}>
-                        <Copy className="w-3 h-3 text-slate-500 hover:text-white" />
-                      </button>
-                    </td>
-                    <td className="py-3.5 px-4 font-sans">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                        tx.txType === 'VERIFY_MINT' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' :
-                        tx.txType === 'REGISTER' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40' :
-                        tx.txType === 'PURCHASE' ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40' :
-                        'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                      }`}>
-                        {tx.txType}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 font-sans text-slate-200 font-semibold">{tx.projectName}</td>
-                    <td className="py-3.5 px-4 text-slate-400">{tx.sender.substring(0, 8)}...</td>
-                    <td className="py-3.5 px-4 text-slate-400">{tx.recipient.substring(0, 8)}...</td>
-                    <td className="py-3.5 px-4 font-bold text-emerald-400 font-sans">
-                      {tx.amount ? `${tx.amount.toLocaleString()} BCT` : '—'}
-                    </td>
-                    <td className="py-3.5 px-4 text-slate-500">{tx.gasUsed}</td>
-                    <td className="py-3.5 px-4 text-slate-400 font-sans">{new Date(tx.timestamp).toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       ) : (
-        /* Solidity Smart Contract Viewer */
-        <div className="rounded-2xl glass-panel bg-slate-950 border border-sky-500/30 overflow-hidden space-y-0">
-          <div className="flex items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-800">
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => setActiveContractTab('REGISTRY')}
-                className={`px-3 py-1 rounded-lg text-xs font-mono transition-all ${
-                  activeContractTab === 'REGISTRY' ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold' : 'text-slate-400'
-                }`}
-              >
-                BlueCarbonRegistry.sol
-              </button>
-              <button
-                onClick={() => setActiveContractTab('TOKEN')}
-                className={`px-3 py-1 rounded-lg text-xs font-mono transition-all ${
-                  activeContractTab === 'TOKEN' ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40 font-bold' : 'text-slate-400'
-                }`}
-              >
-                BlueCarbonToken.sol (ERC-20)
-              </button>
-            </div>
+        <div className="editorial-panel p-6 space-y-6">
+          <div className="flex items-center space-x-2 border-b border-white/[0.08] pb-3 text-xs font-mono">
             <button
-              onClick={() => copyToClipboard(activeContractTab === 'REGISTRY' ? registrySolidity : tokenSolidity)}
-              className="flex items-center space-x-1.5 px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 font-mono"
+              onClick={() => setActiveContractTab('REGISTRY')}
+              className={`px-3 py-1.5 border transition cursor-pointer ${
+                activeContractTab === 'REGISTRY' ? 'border-[#3fb978] bg-[#121a14] text-[#3fb978]' : 'border-white/[0.1] text-[#8d998b]'
+              }`}
             >
-              <Copy className="w-3.5 h-3.5" />
-              <span>Copy Code</span>
+              BlueCarbonRegistry.sol
+            </button>
+            <button
+              onClick={() => setActiveContractTab('TOKEN')}
+              className={`px-3 py-1.5 border transition cursor-pointer ${
+                activeContractTab === 'TOKEN' ? 'border-[#3fb978] bg-[#121a14] text-[#3fb978]' : 'border-white/[0.1] text-[#8d998b]'
+              }`}
+            >
+              BlueCarbonToken.sol (ERC-20)
             </button>
           </div>
 
-          <pre className="p-6 text-xs font-mono text-sky-200 bg-slate-950 overflow-x-auto leading-relaxed">
+          <pre className="p-4 bg-[#050806] border border-white/[0.08] text-xs font-mono text-[#c2c9bf] overflow-x-auto leading-relaxed">
             <code>{activeContractTab === 'REGISTRY' ? registrySolidity : tokenSolidity}</code>
           </pre>
         </div>

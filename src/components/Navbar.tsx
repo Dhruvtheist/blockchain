@@ -5,18 +5,13 @@ import {
   Shield, 
   Waves, 
   Compass, 
-  FileCheck2, 
-  ShoppingBag, 
-  Blocks, 
-  BarChart3, 
-  Search, 
-  Lock, 
   Wallet, 
   Bell, 
   UserCheck, 
   ChevronDown,
   CheckCircle2,
-  X
+  X,
+  Menu
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -33,183 +28,192 @@ export const Navbar: React.FC = () => {
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const roleLabels: Record<UserRole, { title: string; color: string; icon: any }> = {
-    GOV_ADMIN: { title: 'Gov Admin', color: 'bg-purple-500/20 text-purple-300 border-purple-500/30', icon: Shield },
-    PROJECT_OWNER: { title: 'Project Owner', color: 'bg-sky-500/20 text-sky-300 border-sky-500/30', icon: Waves },
-    VERIFIER: { title: 'Auditor / Verifier', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30', icon: UserCheck },
-    PUBLIC: { title: 'Public Citizen', color: 'bg-slate-500/20 text-slate-300 border-slate-500/30', icon: Compass }
+  const roleLabels: Record<UserRole, { title: string; badge: string; icon: any }> = {
+    GOV_ADMIN: { title: 'Regulator Portal', badge: 'Regulator', icon: Shield },
+    PROJECT_OWNER: { title: 'Project Originator', badge: 'Originator', icon: Waves },
+    VERIFIER: { title: 'Accredited Verifier', badge: 'Verifier', icon: UserCheck },
+    PUBLIC: { title: 'Public Observer', badge: 'Public', icon: Compass }
   };
 
   const navItems = [
-    { id: 'landing', label: 'Home', icon: Compass },
-    { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-    { id: 'map', label: 'Interactive Map', icon: Compass },
-    { id: 'register', label: 'Register Project', icon: Waves, roles: ['PROJECT_OWNER', 'GOV_ADMIN'] },
-    { id: 'mrv', label: 'AI MRV Module', icon: Waves, roles: ['PROJECT_OWNER', 'VERIFIER', 'GOV_ADMIN'] },
-    { id: 'verify', label: 'Verifier Portal', icon: FileCheck2, badge: 'Audit', roles: ['VERIFIER', 'GOV_ADMIN'] },
-    { id: 'marketplace', label: 'Carbon Store', icon: ShoppingBag },
-    { id: 'ledger', label: 'Blockchain Ledger', icon: Blocks },
-    { id: 'audit-trail', label: 'Audit Provenance', icon: Search },
-    { id: 'admin', label: 'Admin', icon: Lock, roles: ['GOV_ADMIN'] },
+    { id: 'landing', label: 'Overview' },
+    { id: 'marketplace', label: 'Carbon Store' },
+    { id: 'dashboard', label: 'Portfolio' },
+    { id: 'map', label: 'Geospatial Radar' },
+    { id: 'mrv', label: 'Satellite MRV', roles: ['PROJECT_OWNER', 'VERIFIER', 'GOV_ADMIN'] },
+    { id: 'register', label: 'Registration', roles: ['PROJECT_OWNER', 'GOV_ADMIN'] },
+    { id: 'verify', label: 'Verification Desk', roles: ['VERIFIER', 'GOV_ADMIN'] },
+    { id: 'audit-trail', label: 'Provenance Trail' },
+    { id: 'ledger', label: 'Ledger' },
+    { id: 'admin', label: 'Governance', roles: ['GOV_ADMIN'] },
   ];
 
-  const CurrentRoleIcon = roleLabels[userRole].icon;
-
   return (
-    <header className="sticky top-0 z-50 glass-panel border-b border-sky-500/20 bg-slate-950/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 bg-[#070a08]/95 backdrop-blur-md border-b border-white/[0.08] transition-all">
+      
+      {/* Editorial Precision Top Bar */}
+      <div className="hidden lg:flex items-center justify-between px-8 py-2 border-b border-white/[0.05] text-[11px] text-[#8d998b] font-mono">
+        <div className="flex items-center space-x-6">
+          <span className="flex items-center space-x-2 text-[#c2c9bf]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#3fb978]" />
+            <span className="font-sans font-medium uppercase tracking-wider text-[10px] text-[#3fb978]">Protocol v2.4</span>
+            <span className="text-white/20">/</span>
+            <span>Indian Coastal Carbon Infrastructure</span>
+          </span>
+          <span className="text-white/20">•</span>
+          <span>Aligned with Oxford Offsetting Principles & ICVCM Core Standards</span>
+        </div>
+        <div className="flex items-center space-x-4">
+          <span className="text-[#8d998b]">Decentralized Satellite Telemetry</span>
+          <span className="text-white/20">/</span>
+          <span className="text-[#c2c9bf]">Polygon PoS Smart Contracts</span>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           
+          {/* Brand Wordmark */}
           <div 
-            onClick={() => setActiveView('dashboard')}
-            className="flex items-center space-x-3 cursor-pointer group"
+            onClick={() => setActiveView('landing')}
+            className="flex items-center space-x-3 cursor-pointer group select-none py-2"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 via-teal-500 to-emerald-400 p-0.5 shadow-lg shadow-sky-500/20 group-hover:scale-105 transition-transform">
-              <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                <Waves className="w-6 h-6 text-sky-400 group-hover:rotate-12 transition-transform" />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="text-xl font-bold bg-gradient-to-r from-sky-400 via-teal-300 to-emerald-400 bg-clip-text text-transparent tracking-tight">
+            <div className="flex flex-col">
+              <div className="flex items-baseline space-x-1.5">
+                <span className="text-base sm:text-lg font-bold text-[#f5f6f2] tracking-tight font-display">
                   BlueChain
                 </span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 font-semibold tracking-wider uppercase">
-                  v2.4 Web3
+                <span className="text-[11px] font-mono text-[#3fb978] tracking-normal">
+                  Registry
                 </span>
               </div>
-              <p className="text-[10px] text-slate-400 font-medium tracking-wide">Blockchain Blue Carbon Registry</p>
+              <span className="text-[9px] font-mono text-[#8d998b] uppercase tracking-widest -mt-0.5">
+                Coastal Carbon Systems
+              </span>
             </div>
           </div>
 
-          <nav className="hidden lg:flex items-center space-x-1">
+          {/* Desktop Minimal Navigation */}
+          <nav className="hidden xl:flex items-center space-x-6">
             {navItems.map((item) => {
               if (item.roles && !item.roles.includes(userRole)) return null;
-              const Icon = item.icon;
               const isActive = activeView === item.id;
 
               return (
                 <button
                   key={item.id}
                   onClick={() => setActiveView(item.id)}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                  className={`editorial-link text-xs font-medium tracking-tight py-1 transition-colors ${
                     isActive 
-                      ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-inner'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                      ? 'text-[#f5f6f2] font-semibold' 
+                      : 'text-[#8d998b] hover:text-[#f5f6f2]'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-sky-400' : 'text-slate-400'}`} />
                   <span>{item.label}</span>
-                  {item.badge && (
-                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-blue-500/30 text-blue-300 font-mono">
-                      {item.badge}
-                    </span>
-                  )}
                 </button>
               );
             })}
           </nav>
 
-          <div className="flex items-center space-x-3">
+          {/* Right Action Utilities */}
+          <div className="flex items-center space-x-3 sm:space-x-4">
 
+            {/* Role Persona Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-                className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${roleLabels[userRole].color}`}
+                className="flex items-center space-x-2 px-3 py-1.5 border border-white/[0.12] bg-[#0c120e] hover:border-white/25 text-xs text-[#c2c9bf] transition-all cursor-pointer"
               >
-                <CurrentRoleIcon className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{roleLabels[userRole].title}</span>
-                <ChevronDown className="w-3.5 h-3.5 opacity-70" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#3fb978]" />
+                <span className="hidden sm:inline font-mono text-[11px]">{roleLabels[userRole].title}</span>
+                <span className="sm:hidden font-mono text-[11px]">{roleLabels[userRole].badge}</span>
+                <ChevronDown className="w-3 h-3 text-[#8d998b]" />
               </button>
 
               {showRoleDropdown && (
-                <div className="absolute right-0 mt-2 w-56 rounded-xl glass-panel bg-slate-900 border border-slate-700 shadow-2xl py-2 z-50">
-                  <div className="px-3 py-1.5 border-b border-slate-800 text-[11px] text-slate-400 font-semibold uppercase tracking-wider">
-                    Switch Active Role
+                <div className="absolute right-0 mt-2 w-56 bg-[#0c120e] border border-white/15 shadow-2xl py-1.5 z-50 animate-fadeIn">
+                  <div className="px-3 py-1.5 border-b border-white/10 text-[9px] text-[#8d998b] font-mono uppercase tracking-widest">
+                    Switch Perspective
                   </div>
-                  {(Object.keys(roleLabels) as UserRole[]).map((r) => {
-                    const RoleIcon = roleLabels[r].icon;
-                    return (
-                      <button
-                        key={r}
-                        onClick={() => {
-                          setUserRole(r);
-                          setShowRoleDropdown(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-3 py-2 text-xs transition-colors ${
-                          userRole === r ? 'bg-sky-500/20 text-sky-300 font-semibold' : 'text-slate-300 hover:bg-slate-800'
-                        }`}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RoleIcon className="w-4 h-4 text-slate-400" />
-                          <span>{roleLabels[r].title}</span>
-                        </div>
-                        {userRole === r && <CheckCircle2 className="w-3.5 h-3.5 text-sky-400" />}
-                      </button>
-                    );
-                  })}
+                  {(Object.keys(roleLabels) as UserRole[]).map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => {
+                        setUserRole(r);
+                        setShowRoleDropdown(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2 text-xs font-sans transition-colors text-left cursor-pointer ${
+                        userRole === r ? 'bg-white/[0.06] text-[#3fb978] font-semibold' : 'text-[#c2c9bf] hover:bg-white/[0.03] hover:text-white'
+                      }`}
+                    >
+                      <span>{roleLabels[r].title}</span>
+                      {userRole === r && <CheckCircle2 className="w-3.5 h-3.5 text-[#3fb978]" />}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
 
+            {/* Wallet Status / Connector */}
             {wallet.isConnected ? (
-              <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg glass-panel bg-slate-900/90 border border-emerald-500/30 text-xs">
-                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <Wallet className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="font-mono text-slate-200 hidden sm:inline">
-                  {wallet.address.substring(0, 6)}...{wallet.address.substring(wallet.address.length - 4)}
+              <div className="flex items-center space-x-2 px-3 py-1.5 border border-white/[0.12] bg-[#0c120e] text-xs font-mono">
+                <span className="text-[#3fb978] text-[11px]">
+                  {wallet.balanceBCT.toLocaleString()} BCT
                 </span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold ml-1">
-                  {wallet.balanceBCT} BCT
+                <span className="text-white/20">|</span>
+                <span className="text-[#8d998b] text-[11px] hidden sm:inline">
+                  {wallet.address.substring(0, 6)}...{wallet.address.substring(wallet.address.length - 4)}
                 </span>
               </div>
             ) : (
               <button
                 onClick={connectWallet}
-                className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-sky-500 to-teal-500 text-white font-semibold text-xs shadow-lg shadow-sky-500/25 hover:opacity-90 transition-opacity"
+                className="flex items-center space-x-2 px-3.5 py-1.5 bg-[#f5f6f2] hover:bg-white text-[#070a08] font-semibold text-xs transition-all cursor-pointer"
               >
                 <Wallet className="w-3.5 h-3.5" />
-                <span>Connect MetaMask</span>
+                <span>Connect</span>
               </button>
             )}
 
+            {/* Notifications */}
             <div className="relative">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors relative"
+                className="p-2 text-[#8d998b] hover:text-white hover:bg-white/[0.04] transition-colors relative cursor-pointer"
               >
                 <Bell className="w-4 h-4" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-sky-400 animate-ping" />
+                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#3fb978] rounded-full" />
                 )}
               </button>
 
               {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 rounded-xl glass-panel bg-slate-900 border border-slate-700 shadow-2xl p-3 z-50">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-                    <span className="text-xs font-bold text-slate-200">System Notifications</span>
-                    <button onClick={() => setShowNotifications(false)}>
-                      <X className="w-4 h-4 text-slate-400 hover:text-white" />
+                <div className="absolute right-0 mt-2 w-80 bg-[#0c120e] border border-white/15 shadow-2xl p-4 z-50 animate-fadeIn">
+                  <div className="flex items-center justify-between pb-2 border-b border-white/10">
+                    <span className="text-xs font-mono uppercase tracking-wider text-[#8d998b]">System Ledger Log</span>
+                    <button onClick={() => setShowNotifications(false)} className="cursor-pointer">
+                      <X className="w-4 h-4 text-[#8d998b] hover:text-white" />
                     </button>
                   </div>
-                  <div className="mt-2 space-y-2 max-h-60 overflow-y-auto">
+                  <div className="mt-2 space-y-2 max-h-64 overflow-y-auto pr-1">
                     {notifications.length === 0 ? (
-                      <p className="text-xs text-slate-500 py-3 text-center">No new notifications</p>
+                      <p className="text-xs text-[#8d998b] py-4 text-center">No new log entries</p>
                     ) : (
                       notifications.map(n => (
                         <div 
                           key={n.id}
                           onClick={() => markNotificationRead(n.id)}
-                          className={`p-2.5 rounded-lg text-xs border transition-colors cursor-pointer ${
-                            n.read ? 'bg-slate-800/40 border-slate-800 text-slate-400' : 'bg-sky-950/40 border-sky-500/30 text-slate-200'
+                          className={`p-2.5 border text-xs transition-colors cursor-pointer ${
+                            n.read ? 'border-white/[0.05] bg-transparent text-[#8d998b]' : 'border-[#3fb978]/30 bg-[#121c15] text-[#f5f6f2]'
                           }`}
                         >
-                          <div className="font-semibold text-sky-300">{n.title}</div>
-                          <div className="text-[11px] mt-0.5">{n.message}</div>
-                          <div className="text-[9px] text-slate-500 mt-1">{n.timestamp}</div>
+                          <div className="font-semibold">{n.title}</div>
+                          <div className="text-[11px] text-[#c2c9bf] mt-0.5">{n.message}</div>
+                          <div className="text-[9px] text-[#8d998b] mt-1 font-mono">{n.timestamp}</div>
                         </div>
                       ))
                     )}
@@ -218,30 +222,42 @@ export const Navbar: React.FC = () => {
               )}
             </div>
 
+            {/* Mobile Menu Toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="xl:hidden p-2 text-[#8d998b] hover:text-white"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+
           </div>
 
         </div>
       </div>
-      
-      <div className="lg:hidden flex items-center overflow-x-auto px-4 py-2 space-x-2 border-t border-slate-800">
-        {navItems.map((item) => {
-          if (item.roles && !item.roles.includes(userRole)) return null;
-          const Icon = item.icon;
-          const isActive = activeView === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveView(item.id)}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap ${
-                isActive ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40' : 'text-slate-400'
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
+
+      {/* Mobile Drawer */}
+      {mobileMenuOpen && (
+        <div className="xl:hidden border-t border-white/10 bg-[#070a08] px-4 py-3 space-y-1">
+          {navItems.map((item) => {
+            if (item.roles && !item.roles.includes(userRole)) return null;
+            const isActive = activeView === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setActiveView(item.id);
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2 text-xs font-sans text-left ${
+                  isActive ? 'bg-white/[0.06] text-[#3fb978] font-semibold' : 'text-[#c2c9bf] hover:text-white'
+                }`}
+              >
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
     </header>
   );
 };

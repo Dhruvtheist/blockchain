@@ -17,129 +17,129 @@ export const CertificateModal: React.FC<Props> = ({ certificate, onClose }) => {
       format: 'a4'
     });
 
-    doc.setFillColor(11, 19, 43);
+    // Background - Obsidian Deep
+    doc.setFillColor(7, 10, 8);
     doc.rect(0, 0, 297, 210, 'F');
 
-    doc.setDrawColor(14, 165, 233);
-    doc.setLineWidth(2);
-    doc.rect(10, 10, 277, 190);
+    // Outer Border
+    doc.setDrawColor(46, 125, 86);
+    doc.setLineWidth(1);
+    doc.rect(12, 12, 273, 186);
 
-    doc.setDrawColor(16, 185, 129);
-    doc.setLineWidth(0.8);
-    doc.rect(13, 13, 271, 184);
+    // Inner Hairline
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(0.2);
+    doc.rect(15, 15, 267, 180);
 
-    doc.setTextColor(255, 255, 255);
+    // Title
+    doc.setTextColor(245, 246, 242);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(24);
-    doc.text('BLUECHAIN CARBON REGISTRY', 148, 35, { align: 'center' });
-
-    doc.setTextColor(56, 189, 248);
-    doc.setFontSize(14);
-    doc.text('OFFICIAL VERIFIED BLUE CARBON OFFSET CERTIFICATE', 148, 46, { align: 'center' });
-
-    doc.setTextColor(203, 213, 225);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
-    doc.text('This document certifies that', 148, 65, { align: 'center' });
-
-    doc.setTextColor(16, 185, 129);
     doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.text(certificate.buyerName.toUpperCase(), 148, 77, { align: 'center' });
+    doc.text('BLUECHAIN REGISTRY PROTOCOL', 148, 38, { align: 'center' });
 
-    doc.setTextColor(203, 213, 225);
+    doc.setTextColor(63, 185, 120);
     doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`has successfully acquired and retired verified Blue Carbon Credits for ecosystem restoration`, 148, 90, { align: 'center' });
+    doc.text('OFFICIAL VERIFIED BLUE CARBON RETIREMENT CERTIFICATE', 148, 48, { align: 'center' });
 
-    doc.setFillColor(15, 23, 42);
-    doc.rect(40, 102, 217, 50, 'F');
-    doc.setDrawColor(56, 189, 248);
-    doc.rect(40, 102, 217, 50);
-
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`Credits Retired: ${certificate.creditsCount.toLocaleString()} Metric Tons CO2e (BCT Tokens)`, 50, 115);
-    doc.text(`Project Name: ${certificate.projectName}`, 50, 126);
-    doc.text(`Ecosystem Type: ${certificate.ecosystem} Ecosystem`, 50, 137);
-    doc.text(`Location: ${certificate.state}, India`, 50, 146);
-
-    doc.setTextColor(148, 163, 184);
+    doc.setTextColor(141, 153, 139);
     doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('This document certifies that', 148, 68, { align: 'center' });
+
+    doc.setTextColor(245, 246, 242);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text(certificate.buyerName.toUpperCase(), 148, 80, { align: 'center' });
+
+    doc.setTextColor(141, 153, 139);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('has successfully acquired and permanently retired verified Blue Carbon Credits for coastal restoration.', 148, 92, { align: 'center' });
+
+    // Details Box
+    doc.setFillColor(12, 18, 14);
+    doc.rect(40, 105, 217, 48, 'F');
+    doc.setDrawColor(255, 255, 255);
+    doc.rect(40, 105, 217, 48);
+
+    doc.setTextColor(245, 246, 242);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Credits Retired: ${certificate.creditsCount.toLocaleString()} Metric Tons CO2e (BCT Tokens)`, 48, 117);
+    doc.text(`Project Name: ${certificate.projectName}`, 48, 127);
+    doc.text(`Ecosystem: ${certificate.ecosystem} (${certificate.state}, India)`, 48, 137);
+
+    doc.setTextColor(141, 153, 139);
+    doc.setFontSize(7.5);
     doc.setFont('courier', 'normal');
     doc.text(`Certificate Serial: ${certificate.certificateId}`, 40, 168);
-    doc.text(`Blockchain Transaction Hash: ${certificate.txHash}`, 40, 174);
+    doc.text(`Transaction Hash: ${certificate.txHash}`, 40, 174);
     doc.text(`Issuance Timestamp: ${certificate.issueDate}`, 40, 180);
 
     doc.save(`${certificate.certificateId}_BlueCarbon.pdf`);
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full rounded-2xl glass-panel bg-slate-950 border-2 border-sky-500/40 p-6 md:p-8 space-y-6 relative shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-[#070a08]/90 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
+      <div className="max-w-2xl w-full editorial-panel p-6 sm:p-8 space-y-6 border-white/20 relative">
         
-        <div className="absolute right-0 bottom-0 w-80 h-80 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
-
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          className="absolute top-4 right-4 p-1 text-[#8d998b] hover:text-white transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <div className="text-center space-y-2 border-b border-sky-500/20 pb-6">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-500 to-emerald-400 p-0.5 mx-auto shadow-lg shadow-sky-500/30 flex items-center justify-center">
-            <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
-              <Award className="w-7 h-7 text-sky-400" />
-            </div>
+        <div className="text-center space-y-2 border-b border-white/[0.08] pb-6">
+          <div className="w-10 h-10 border border-white/[0.15] bg-[#0c120e] mx-auto flex items-center justify-center">
+            <Award className="w-5 h-5 text-[#3fb978]" />
           </div>
-          <h2 className="text-xl md:text-2xl font-black text-white tracking-wide uppercase">
-            Official Blue Carbon Offset Certificate
+          <h2 className="text-lg sm:text-xl font-bold text-[#f5f6f2] font-display uppercase tracking-tight">
+            Official Blue Carbon Retirement Certificate
           </h2>
-          <p className="text-xs text-sky-300 font-mono">Issued by BlueChain Registry • Ethereum Smart Contract</p>
+          <p className="text-xs text-[#3fb978] font-mono">Issued by BlueChain Registry Protocol • On-Chain Settlement</p>
         </div>
 
-        <div className="text-center space-y-2">
-          <p className="text-xs text-slate-400">This document certifies that</p>
-          <div className="text-xl md:text-2xl font-black text-emerald-400 tracking-tight">
+        <div className="text-center space-y-1.5">
+          <p className="text-xs text-[#8d998b]">This document certifies that</p>
+          <div className="text-xl font-bold text-[#f5f6f2] font-display">
             {certificate.buyerName}
           </div>
-          <p className="text-xs text-slate-300 max-w-md mx-auto">
-            has permanently retired <span className="font-bold text-sky-300">{certificate.creditsCount.toLocaleString()} Metric Tons CO₂e</span> of verified blue carbon offsets generated from coastal ecosystem restoration.
+          <p className="text-xs text-[#8d998b] max-w-md mx-auto leading-relaxed">
+            has permanently retired <span className="font-bold text-[#f5f6f2]">{certificate.creditsCount.toLocaleString()} Metric Tons CO₂e</span> of verified blue carbon offsets from verified coastal restoration projects.
           </p>
         </div>
 
-        <div className="p-4 rounded-xl glass-panel bg-slate-900/80 border border-slate-700/80 text-xs space-y-2 font-mono">
-          <div className="flex justify-between border-b border-slate-800 pb-2">
-            <span className="text-slate-400">Certificate ID:</span>
-            <span className="text-sky-300 font-bold">{certificate.certificateId}</span>
+        <div className="p-4 bg-[#050806] border border-white/[0.08] text-xs space-y-2 font-mono">
+          <div className="flex justify-between border-b border-white/[0.06] pb-1.5">
+            <span className="text-[#8d998b]">Certificate ID:</span>
+            <span className="text-[#3fb978] font-bold">{certificate.certificateId}</span>
           </div>
-          <div className="flex justify-between border-b border-slate-800 pb-2">
-            <span className="text-slate-400">Restoration Project:</span>
-            <span className="text-slate-200 font-sans font-semibold">{certificate.projectName}</span>
+          <div className="flex justify-between border-b border-white/[0.06] pb-1.5">
+            <span className="text-[#8d998b]">Project:</span>
+            <span className="text-[#f5f6f2] font-sans">{certificate.projectName}</span>
           </div>
-          <div className="flex justify-between border-b border-slate-800 pb-2">
-            <span className="text-slate-400">Ecosystem:</span>
-            <span className="text-teal-300">{certificate.ecosystem} ({certificate.state}, India)</span>
+          <div className="flex justify-between border-b border-white/[0.06] pb-1.5">
+            <span className="text-[#8d998b]">Habitat:</span>
+            <span className="text-[#c2c9bf]">{certificate.ecosystem} ({certificate.state}, India)</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-400">Tx Hash:</span>
-            <span className="text-slate-400">{certificate.txHash.substring(0, 16)}...</span>
+            <span className="text-[#8d998b]">Tx Hash:</span>
+            <span className="text-[#8d998b]">{certificate.txHash.substring(0, 20)}...</span>
           </div>
         </div>
 
         <div className="flex items-center justify-between pt-2">
-          <div className="flex items-center space-x-2 text-xs text-emerald-400 font-semibold">
+          <div className="flex items-center space-x-1.5 text-xs text-[#3fb978] font-mono">
             <ShieldCheck className="w-4 h-4" />
-            <span>Cryptographically Verified on Ethereum</span>
+            <span>Cryptographically Verified</span>
           </div>
 
           <button
             onClick={handleDownloadPDF}
-            className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-teal-500 text-white font-bold text-xs shadow-lg shadow-sky-500/25 hover:opacity-90 transition-all"
+            className="flex items-center space-x-2 px-5 py-2 bg-[#f5f6f2] hover:bg-white text-[#070a08] font-semibold text-xs transition cursor-pointer"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-3.5 h-3.5" />
             <span>Download PDF Certificate</span>
           </button>
         </div>

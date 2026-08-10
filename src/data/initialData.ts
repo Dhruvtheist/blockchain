@@ -29,7 +29,7 @@ export const INITIAL_PROJECTS: Project[] = [
     verifierSignature: '0x7a8f9b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f',
     timestamp: '2026-03-15T10:30:00Z',
     txHash: '0x8f3c71a9e4d580129b6110a137e9d48b11c47209bc714f85e13d9021c1724a1b',
-    imageUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '/images/sundarbans_mangrove_aerial.png',
     documents: [
       { name: 'LiDAR_Soil_Carbon_Density_Report.pdf', url: '#', hash: '0xa719f...411' },
       { name: 'State_Forest_Dept_NOC_Approval.pdf', url: '#', hash: '0xb231c...881' }
@@ -76,7 +76,7 @@ export const INITIAL_PROJECTS: Project[] = [
     verifierSignature: '0x1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b',
     timestamp: '2026-03-20T14:15:00Z',
     txHash: '0x12a95c8f10b784260d39e4418f754a93821049bc82e11d4e7311029c782bc401',
-    imageUrl: 'https://images.unsplash.com/photo-1682687220063-4742bd7fd538?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '/images/gulf_mannar_seagrass.png',
     documents: [
       { name: 'Sonar_Seagrass_Coverage_Map.pdf', url: '#', hash: '0x8432a...902' }
     ],
@@ -121,7 +121,7 @@ export const INITIAL_PROJECTS: Project[] = [
     verificationRemarks: 'MRV evidence submitted. Awaiting government verifier digital signature.',
     timestamp: '2026-03-28T09:00:00Z',
     txHash: '0x44910bc728a19245f7810a901f42d87e1c849102874bc19284102947192bc7e',
-    imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '/images/chilika_salt_marsh.png',
     documents: [
       { name: 'Boundary_Coordinates_Survey.pdf', url: '#', hash: '0x1290f...991' },
       { name: 'Drone_Multispectral_NDVI_Output.csv', url: '#', hash: '0x7731a...009' }
@@ -168,7 +168,7 @@ export const INITIAL_PROJECTS: Project[] = [
     verifierSignature: '0x3f4e5d6c7b8a9f0e1d2c3b4a5f6e7d8c9b0a1f2e3d4c5b6a7f8e9d0c1b2a3f4e',
     timestamp: '2026-02-10T11:20:00Z',
     txHash: '0x99201bc839410a8274bc91028471b827491028471b827491028471b827491028',
-    imageUrl: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '/images/pichavaram_mangrove_roots.png',
     documents: [
       { name: 'Forest_Dept_Audit.pdf', url: '#', hash: '0x9920...112' }
     ]
@@ -200,7 +200,7 @@ export const INITIAL_PROJECTS: Project[] = [
     verificationRemarks: 'Rejected: Satellite imagery revealed overlap with commercial industrial salt pan conversion application.',
     timestamp: '2026-03-01T16:45:00Z',
     txHash: '0x77201bc94102847192bc749102847192847102947192bc7e49102847192bc7e',
-    imageUrl: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '/images/chilika_salt_marsh.png',
     documents: [
       { name: 'Kutch_Industrial_Overlap_Report.pdf', url: '#', hash: '0xef001...223' }
     ]
