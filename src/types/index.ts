@@ -94,3 +94,30 @@ export interface CarbonCertificate {
   state: string;
 }
 
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: UserRole;
+  organization?: string;
+  walletAddress?: string;
+  createdAt: string;
+}
+
+export interface LoginCredentials {
+  identifier: string; // Email or username
+  password: string;
+  rememberMe?: boolean;
+}
+
+export interface RegisterFormData {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+  role: UserRole;
+  organization?: string;
+}
+

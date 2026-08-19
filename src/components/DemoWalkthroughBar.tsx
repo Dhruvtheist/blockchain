@@ -7,19 +7,19 @@ export const DemoWalkthroughBar: React.FC = () => {
 
   if (!isDemoActive) {
     return (
-      <div className="editorial-card p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+      <div className="editorial-card p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 bg-[var(--surface-card)] border border-[var(--border-color)] rounded-2xl shadow-xs">
         <div className="flex items-center space-x-3.5">
-          <div className="w-8 h-8 flex items-center justify-center border border-white/[0.12] bg-[#070a08] text-[#3fb978] font-mono text-xs">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-[var(--color-primary)]/20 bg-[var(--color-primary-soft)] text-[var(--color-primary)] font-mono text-xs font-bold shrink-0">
             01
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="text-xs font-semibold text-[#f5f6f2] font-mono uppercase tracking-wider">Evaluation Walkthrough Mode</span>
-              <span className="text-[10px] font-mono px-2 py-0.2 border border-white/[0.1] text-[#8d998b]">
+              <span className="text-xs font-bold text-[var(--text-primary)] font-mono uppercase tracking-wider">Evaluation Walkthrough Mode</span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--surface-panel)] border border-[var(--border-color)] text-[var(--text-secondary)] font-semibold">
                 SIH Guided Tour
               </span>
             </div>
-            <span className="text-xs text-[#8d998b] block mt-0.5">
+            <span className="text-xs text-[var(--text-secondary)] block mt-0.5">
               Follow the end-to-end lifecycle across Registration, Sentinel-2 MRV Telemetry, Auditor Sign-off, and Smart Contract Settlement.
             </span>
           </div>
@@ -32,7 +32,7 @@ export const DemoWalkthroughBar: React.FC = () => {
             setUserRole('PROJECT_OWNER');
             setActiveView('register');
           }}
-          className="px-4 py-2 bg-[#f5f6f2] hover:bg-white text-[#070a08] font-semibold text-xs transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer"
+          className="h-9 px-4 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--button-primary-text)] font-semibold text-xs transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer shadow-xs"
         >
           <PlayCircle className="w-3.5 h-3.5" />
           <span>Launch Tour</span>
@@ -69,26 +69,26 @@ export const DemoWalkthroughBar: React.FC = () => {
   };
 
   return (
-    <div className="editorial-card p-5 space-y-4 mb-8 animate-fadeIn border-[#3fb978]/40">
+    <div className="editorial-card p-5 space-y-4 mb-6 animate-fadeIn bg-[var(--surface-card)] border border-[var(--color-primary)]/40 rounded-2xl shadow-xs">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#3fb978]" />
-          <span className="text-xs font-mono uppercase tracking-wider font-semibold text-[#f5f6f2]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-success)] animate-pulse" />
+          <span className="text-xs font-mono uppercase tracking-wider font-bold text-[var(--text-primary)]">
             Evaluation Mode Active
           </span>
-          <span className="text-xs text-[#8d998b] font-mono">— Step {demoStep} of {steps.length}</span>
+          <span className="text-xs text-[var(--text-secondary)] font-mono tabular-nums">— Step {demoStep} of {steps.length}</span>
         </div>
 
         <button
           onClick={() => { setIsDemoActive(false); setDemoStep(0); }}
-          className="text-[#8d998b] hover:text-white transition text-xs flex items-center gap-1 cursor-pointer font-mono"
+          className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition text-xs flex items-center gap-1 cursor-pointer font-mono"
         >
           <span>Close</span> <X className="w-3.5 h-3.5" />
         </button>
       </div>
 
       {/* Step Indicators */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-1.5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-1.5 tabular-nums">
         {steps.map(s => (
           <button
             key={s.num}
@@ -97,12 +97,12 @@ export const DemoWalkthroughBar: React.FC = () => {
               setUserRole(s.role as any);
               setActiveView(s.view);
             }}
-            className={`py-2 px-2 text-[11px] font-mono text-center transition-all truncate border cursor-pointer ${
+            className={`h-8 px-2 text-[11px] font-mono text-center rounded-md transition-all truncate border cursor-pointer ${
               s.num === demoStep 
-                ? 'bg-[#3fb978] text-[#070a08] font-bold border-[#3fb978]'
+                ? 'bg-[var(--color-primary)] text-white font-bold border-[var(--color-primary)] shadow-xs'
                 : s.num < demoStep
-                ? 'bg-[#121a14] text-[#c2c9bf] border-white/[0.1]'
-                : 'bg-[#070a08] text-[#8d998b] border-white/[0.06] hover:text-white'
+                ? 'bg-[var(--color-success-soft)] text-[var(--color-success)] font-semibold border-[var(--color-success)]/30'
+                : 'bg-[var(--surface-panel)] text-[var(--text-muted)] border-[var(--border-color)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-panel)]'
             }`}
           >
             0{s.num}
@@ -111,20 +111,20 @@ export const DemoWalkthroughBar: React.FC = () => {
       </div>
 
       {/* Active Step Information Box */}
-      <div className="flex flex-col sm:flex-row items-center justify-between bg-[#070a08] p-4 border border-white/[0.08] gap-3">
-        <div className="space-y-0.5">
+      <div className="flex flex-col sm:flex-row items-center justify-between bg-[var(--surface-panel)] p-3.5 rounded-xl border border-[var(--border-color)] gap-3">
+        <div className="space-y-1">
           <div className="flex items-center space-x-2">
-            <span className="text-xs font-semibold text-[#f5f6f2]">{currentStepObj.title}</span>
-            <span className="text-[10px] font-mono px-1.5 py-0.2 border border-white/[0.1] text-[#8d998b]">
+            <span className="text-xs font-bold text-[var(--text-primary)]">{currentStepObj.title}</span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--surface-card)] border border-[var(--border-color)] text-[var(--color-primary)] font-semibold">
               Role: {currentStepObj.role}
             </span>
           </div>
-          <p className="text-xs text-[#8d998b]">{currentStepObj.desc}</p>
+          <p className="text-xs text-[var(--text-secondary)]">{currentStepObj.desc}</p>
         </div>
 
         <button
           onClick={handleNextStep}
-          className="w-full sm:w-auto px-5 py-2 bg-[#f5f6f2] hover:bg-white text-[#070a08] font-semibold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+          className="w-full sm:w-auto h-9 px-4.5 rounded-lg bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--button-primary-text)] font-semibold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap"
         >
           <span>{demoStep === steps.length ? 'Finish Tour' : 'Next Step'}</span>
           <ChevronRight className="w-3.5 h-3.5" />

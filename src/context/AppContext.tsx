@@ -1,5 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { Project, UserRole, BlockchainTransaction, WalletState, SystemNotification, CarbonCertificate, MRVReport } from '../types';
+import type { 
+  Project, 
+  UserRole, 
+  BlockchainTransaction, 
+  WalletState, 
+  SystemNotification, 
+  CarbonCertificate, 
+  MRVReport,
+  AuthUser,
+  LoginCredentials,
+  RegisterFormData
+} from '../types';
 import { INITIAL_PROJECTS, INITIAL_TRANSACTIONS } from '../data/initialData';
 
 declare global {
@@ -8,9 +19,77 @@ declare global {
   }
 }
 
+export type ThemeMode = 'dark' | 'light';
+
+export const DEFAULT_DEMO_USERS: (AuthUser & { passwordHash: string })[] = [
+  {
+    id: 'usr-gov-01',
+    name: 'Dr. Rajesh Sharma',
+    email: 'admin@bluechain.gov.in',
+    phone: '+91 98100 12345',
+    role: 'GOV_ADMIN',
+    organization: 'Ministry of Environment & Forests (MoEFCC)',
+    walletAddress: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
+    createdAt: '2026-01-15T00:00:00Z',
+    passwordHash: 'admin123'
+  },
+  {
+    id: 'usr-orig-02',
+    name: 'Priya Sundaram',
+    email: 'originator@sundarbans.org',
+    phone: '+91 98450 67890',
+    role: 'PROJECT_OWNER',
+    organization: 'Sundarbans Coastal Eco Community Trust',
+    walletAddress: '0x3C44CdD47a356F43003636079856ab281e728E47',
+    createdAt: '2026-02-01T00:00:00Z',
+    passwordHash: 'originator123'
+  },
+  {
+    id: 'usr-ver-03',
+    name: 'Vikramaditya Das',
+    email: 'verifier@carbonaudit.org',
+    phone: '+91 98230 54321',
+    role: 'VERIFIER',
+    organization: 'Global Oceanic Carbon Verification Council',
+    walletAddress: '0x90F79bf6EB2c4f870365E785982E1f101E93b906',
+    createdAt: '2026-02-10T00:00:00Z',
+    passwordHash: 'verifier123'
+  },
+  {
+    id: 'usr-pub-04',
+    name: 'Ananya Roy',
+    email: 'observer@public.org',
+    phone: '+91 98765 43210',
+    role: 'PUBLIC',
+    organization: 'Independent Climate Citizen Observer',
+    walletAddress: '0x0000000000000000000000000000000000000000',
+    createdAt: '2026-03-01T00:00:00Z',
+    passwordHash: 'observer123'
+  }
+];
+
+export const getRoleDefaultView = (role: UserRole): string => {
+  switch (role) {
+    case 'GOV_ADMIN':
+      return 'verify';
+    case 'PROJECT_OWNER':
+      return 'register';
+    case 'VERIFIER':
+      return 'verify';
+    case 'PUBLIC':
+    default:
+      return 'public-audit';
+  }
+};
+
 interface AppContextType {
   userRole: UserRole;
   setUserRole: (role: UserRole) => void;
+  currentUser: AuthUser | null;
+  isAuthenticated: boolean;
+  login: (credentials: LoginCredentials) => Promise<{ success: boolean; error?: string }>;
+  register: (formData: RegisterFormData) => Promise<{ success: boolean; error?: string }>;
+  logout: () => void;
   wallet: WalletState;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
@@ -26,6 +105,7 @@ interface AppContextType {
   markNotificationRead: (id: string) => void;
   activeView: string;
   setActiveView: (view: string) => void;
+  navigateToView: (view: string) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   contractAddress: string;
@@ -33,12 +113,48 @@ interface AppContextType {
   setDemoStep: (step: number) => void;
   isDemoActive: boolean;
   setIsDemoActive: (active: boolean) => void;
+  theme: ThemeMode;
+  toggleTheme: () => void;
+  setTheme: (theme: ThemeMode) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [userRole, setUserRole] = useState<UserRole>('GOV_ADMIN');
+  const [theme, setThemeState] = useState<ThemeMode>(() => {
+    const saved = localStorage.getItem('bluechain-theme');
+    return (saved === 'light' || saved === 'dark') ? saved : 'dark';
+  });
+
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
+    const saved = localStorage.getItem('bluechain_auth_user');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return null;
+      }
+    }
+    // Default seed active session for convenience, or null
+    return DEFAULT_DEMO_USERS[0];
+  });
+
+  const [registeredUsers, setRegisteredUsers] = useState<(AuthUser & { passwordHash: string })[]>(() => {
+    const saved = localStorage.getItem('bluechain_registered_users');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return DEFAULT_DEMO_USERS;
+      }
+    }
+    return DEFAULT_DEMO_USERS;
+  });
+
+  const [userRole, setUserRole] = useState<UserRole>(() => {
+    return currentUser?.role || 'GOV_ADMIN';
+  });
+
   const [activeView, setActiveView] = useState<string>('landing');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [demoStep, setDemoStep] = useState<number>(0);
@@ -99,6 +215,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const contractAddress = '0x8A753747A1Fa494EC906ce90e9f37563A8AF630e';
+
+  // Apply theme class and data-theme to document element and persist to localStorage
+  useEffect(() => {
+    document.documentElement.className = theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('bluechain-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setThemeState(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+
+  const setTheme = (newTheme: ThemeMode) => {
+    setThemeState(newTheme);
+  };
 
   useEffect(() => {
     localStorage.setItem('bluechain_projects', JSON.stringify(projects));
@@ -368,10 +499,134 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return certificate;
   };
 
+  const login = async (credentials: LoginCredentials): Promise<{ success: boolean; error?: string }> => {
+    const idClean = credentials.identifier.trim().toLowerCase();
+    const passClean = credentials.password.trim();
+
+    if (!idClean) {
+      return { success: false, error: 'Please enter your email or username.' };
+    }
+    if (!passClean) {
+      return { success: false, error: 'Please enter your password.' };
+    }
+
+    const found = registeredUsers.find(
+      u => u.email.toLowerCase() === idClean || u.name.toLowerCase() === idClean || u.id.toLowerCase() === idClean
+    );
+
+    if (!found) {
+      return { success: false, error: 'No registered account found matching this credential.' };
+    }
+
+    if (found.passwordHash !== passClean) {
+      return { success: false, error: 'Incorrect password. Please verify your credentials.' };
+    }
+
+    const { passwordHash, ...userClean } = found;
+    setCurrentUser(userClean);
+    setUserRole(userClean.role);
+    localStorage.setItem('bluechain_auth_user', JSON.stringify(userClean));
+
+    addNotification(
+      'Authentication Successful',
+      `Welcome back, ${userClean.name}! Signed in as ${userClean.role}.`,
+      'success'
+    );
+
+    const defaultView = getRoleDefaultView(userClean.role);
+    setActiveView(defaultView);
+    return { success: true };
+  };
+
+  const register = async (formData: RegisterFormData): Promise<{ success: boolean; error?: string }> => {
+    const emailClean = formData.email.trim().toLowerCase();
+    const nameClean = formData.name.trim();
+
+    if (!nameClean) return { success: false, error: 'Full name is required.' };
+    if (!emailClean) return { success: false, error: 'Email address is required.' };
+    if (!formData.password) return { success: false, error: 'Password is required.' };
+    if (formData.password.length < 6) return { success: false, error: 'Password must be at least 6 characters long.' };
+    if (formData.password !== formData.confirmPassword) return { success: false, error: 'Passwords do not match.' };
+    if (!formData.role) return { success: false, error: 'Please select an account role.' };
+
+    const existing = registeredUsers.find(u => u.email.toLowerCase() === emailClean);
+    if (existing) {
+      return { success: false, error: 'An account with this email address already exists. Please sign in.' };
+    }
+
+    const newUser: AuthUser & { passwordHash: string } = {
+      id: `usr-${Date.now().toString().slice(-6)}`,
+      name: nameClean,
+      email: emailClean,
+      phone: formData.phone?.trim() || '',
+      role: formData.role,
+      organization: formData.organization?.trim() || `${formData.role} Entity`,
+      walletAddress: wallet.address,
+      createdAt: new Date().toISOString(),
+      passwordHash: formData.password
+    };
+
+    const updatedList = [newUser, ...registeredUsers];
+    setRegisteredUsers(updatedList);
+    localStorage.setItem('bluechain_registered_users', JSON.stringify(updatedList));
+
+    const { passwordHash, ...userClean } = newUser;
+    setCurrentUser(userClean);
+    setUserRole(userClean.role);
+    localStorage.setItem('bluechain_auth_user', JSON.stringify(userClean));
+
+    addNotification(
+      'Registration Complete',
+      `Account created for ${userClean.name} with ${userClean.role} credentials.`,
+      'success'
+    );
+
+    const defaultView = getRoleDefaultView(userClean.role);
+    setActiveView(defaultView);
+    return { success: true };
+  };
+
+  const logout = () => {
+    setCurrentUser(null);
+    setUserRole('PUBLIC');
+    localStorage.removeItem('bluechain_auth_user');
+    setActiveView('login');
+    addNotification('Session Terminated', 'You have been securely logged out.', 'info');
+  };
+
+  const protectedViewsConfig: Record<string, UserRole[]> = {
+    'admin': ['GOV_ADMIN'],
+    'verify': ['GOV_ADMIN', 'VERIFIER'],
+    'register': ['PROJECT_OWNER', 'GOV_ADMIN'],
+    'mrv': ['PROJECT_OWNER', 'VERIFIER', 'GOV_ADMIN'],
+  };
+
+  const navigateToView = (targetView: string) => {
+    const requiredRoles = protectedViewsConfig[targetView];
+
+    if (requiredRoles) {
+      if (!currentUser) {
+        addNotification('Authentication Required', 'Please sign in to access this protected portal.', 'warning');
+        setActiveView('login');
+        return;
+      }
+      if (!requiredRoles.includes(userRole)) {
+        addNotification('Restricted Access', `Your role (${userRole}) is not authorized to access the ${targetView} module.`, 'error');
+        return;
+      }
+    }
+    setActiveView(targetView);
+  };
+
   return (
     <AppContext.Provider value={{
       userRole,
       setUserRole,
+      currentUser,
+      isAuthenticated: !!currentUser,
+      login,
+      register,
+      logout,
       wallet,
       connectWallet,
       disconnectWallet,
@@ -387,13 +642,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       markNotificationRead,
       activeView,
       setActiveView,
+      navigateToView,
       searchQuery,
       setSearchQuery,
       contractAddress,
       demoStep,
       setDemoStep,
       isDemoActive,
-      setIsDemoActive
+      setIsDemoActive,
+      theme,
+      toggleTheme,
+      setTheme
     }}>
       {children}
     </AppContext.Provider>
