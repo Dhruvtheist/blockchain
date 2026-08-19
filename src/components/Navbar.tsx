@@ -17,7 +17,6 @@ import {
   LogIn,
   LogOut,
   UserPlus,
-  User
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -25,7 +24,6 @@ export const Navbar: React.FC = () => {
     userRole, 
     setUserRole, 
     currentUser,
-    isAuthenticated,
     logout,
     wallet, 
     connectWallet, 
